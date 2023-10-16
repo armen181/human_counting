@@ -3,7 +3,8 @@ import numpy as np
 
 NMS_THRESH, IMG_SIZE = 0.45, 640
 
-CLASSES = ("HUMAN_FACE")
+SHOWED_OBJ_INDEX = 0
+
 
 def xywh2xyxy(x):
     y = np.copy(x)
@@ -15,7 +16,6 @@ def xywh2xyxy(x):
 
 
 def process(input, mask, anchors):
-
     anchors = [anchors[i] for i in mask]
     grid_h, grid_w = map(int, input.shape[0:2])
 
@@ -24,7 +24,7 @@ def process(input, mask, anchors):
 
     box_class_probs = input[..., 5:]
 
-    box_xy = input[..., :2] *2 - 0.5
+    box_xy = input[..., :2] * 2 - 0.5
 
     col = np.tile(np.arange(0, grid_w), grid_w).reshape(-1, grid_w)
     row = np.tile(np.arange(0, grid_h).reshape(-1, 1), grid_h)
@@ -32,9 +32,9 @@ def process(input, mask, anchors):
     row = row.reshape(grid_h, grid_w, 1, 1).repeat(3, axis=-2)
     grid = np.concatenate((col, row), axis=-1)
     box_xy += grid
-    box_xy *= int(IMG_SIZE/grid_h)
+    box_xy *= int(IMG_SIZE / grid_h)
 
-    box_wh = pow(input[..., 2:4] *2, 2)
+    box_wh = pow(input[..., 2:4] * 2, 2)
     box_wh = box_wh * anchors
 
     return np.concatenate((box_xy, box_wh), axis=-1), box_confidence, box_class_probs
@@ -95,9 +95,11 @@ def yolov5_post_process(input_data, threshold):
     for input, mask in zip(input_data, masks):
         b, c, s = process(input, mask, anchors)
         b, c, s = filter_boxes(b, c, s, threshold)
-        boxes.append(b)
-        classes.append(c)
-        scores.append(s)
+        showed_indexes = np.where(c == SHOWED_OBJ_INDEX)
+        for idx in showed_indexes:
+            boxes.append(b[idx])
+            classes.append(c[idx])
+            scores.append(s[idx])
 
     boxes = np.concatenate(boxes)
     boxes = xywh2xyxy(boxes)
@@ -126,19 +128,19 @@ def yolov5_post_process(input_data, threshold):
 def draw(image, boxes, scores, classes):
     for box, score, cl in zip(boxes, scores, classes):
         top, left, right, bottom = box
-        print('class: {}, score: {}'.format(CLASSES[cl], score))
         top = int(top)
         left = int(left)
 
         cv2.rectangle(image, (top, left), (int(right), int(bottom)), (255, 0, 0), 2)
 
+
 def rknnDetectionFunc(rknn_lite, IMG, threshold):
     IMG = cv2.cvtColor(IMG, cv2.COLOR_BGR2RGB)
     outputs = rknn_lite.inference(inputs=[IMG])
 
-    input0_data = outputs[0].reshape([3, -1]+list(outputs[0].shape[-2:]))
-    input1_data = outputs[1].reshape([3, -1]+list(outputs[1].shape[-2:]))
-    input2_data = outputs[2].reshape([3, -1]+list(outputs[2].shape[-2:]))
+    input0_data = outputs[0].reshape([3, -1] + list(outputs[0].shape[-2:]))
+    input1_data = outputs[1].reshape([3, -1] + list(outputs[1].shape[-2:]))
+    input2_data = outputs[2].reshape([3, -1] + list(outputs[2].shape[-2:]))
 
     input_data = list()
     input_data.append(np.transpose(input0_data, (2, 3, 0, 1)))
