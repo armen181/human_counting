@@ -1,5 +1,7 @@
 from rknnlite.api import RKNNLite
+
 from func.rknndetectionfunc import rknnDetectionFunc
+from func.rknntrackfunc import rknnTrackFunc
 
 
 def rknnInit(rknnModel, id):
@@ -35,3 +37,12 @@ class rknnHumanDetector():
 
     def release(self):
         self.rknn.release()
+
+
+class rknnTracking():
+
+    def get(self, frame, boxes):
+        return rknnTrackFunc((), frame, boxes)
+
+    def release(self):
+        return True

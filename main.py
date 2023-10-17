@@ -1,18 +1,23 @@
-import cv2
 import time
 
-cap = cv2.VideoCapture('./resource/1.mp4')
-#cap = cv2.VideoCapture(1)
+import cv2
+
+cap = cv2.VideoCapture('./resource/4.m4v')
+# cap = cv2.VideoCapture(1)
 
 use_rknn = False
-threshold = 0.3
+threshold = 0.4
 
 if use_rknn:
-    from rknnpool import rknnHumanDetector
+    from rknnpool import rknnHumanDetector, rknnTracking
+
     firstDetector = rknnHumanDetector(threshold)
+    secondTracking = rknnTracking()
 else:
-    from tourchpool import humanDetector
+    from tourchpool import humanDetector, tracking
+
     firstDetector = humanDetector(threshold)
+    secondTracking = tracking()
 
 frames, loopTime, initTime = 0, time.time(), time.time()
 while cap.isOpened():
@@ -21,9 +26,14 @@ while cap.isOpened():
     if not ret:
         break
     frame = cv2.resize(frame, (640, 640))
-    frame, flag = firstDetector.get(frame)
-    if not flag:
-        break
+
+    frame, boxes = firstDetector.get(frame)
+
+    if boxes is None or len(boxes) == 0:
+        continue
+
+    frame, boxes = secondTracking.get(frame, boxes)
+
     cv2.imshow('Human Counting', frame)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
