@@ -130,8 +130,13 @@ def draw(image, boxes, scores, classes):
         top, left, right, bottom = box
         top = int(top)
         left = int(left)
-
-        cv2.rectangle(image, (top, left), (int(right), int(bottom)), (255, 0, 0), 2)
+        #
+        # cv2.rectangle(image, (top, left), (int(right), int(bottom)), (255, 0, 0), 2)
+        cx = (top + right) // 2
+        cy = (left + bottom) // 2
+        w = right - top
+        h = bottom - left
+        boxes.append([cx, cy, w, h])
 
 
 def rknnDetectionFunc(rknn_lite, IMG, threshold):
@@ -149,7 +154,7 @@ def rknnDetectionFunc(rknn_lite, IMG, threshold):
 
     boxes, classes, scores = yolov5_post_process(input_data, threshold)
 
-    IMG = cv2.cvtColor(IMG, cv2.COLOR_RGB2BGR)
+    # IMG = cv2.cvtColor(IMG, cv2.COLOR_RGB2BGR)
     if boxes is not None:
-        draw(IMG, boxes, scores, classes)
+        return IMG, draw(IMG, boxes, scores, classes)
     return IMG
