@@ -1,8 +1,6 @@
-# vim: expandtab:ts=4:sw=4
 from __future__ import absolute_import
 
 import numpy as np
-# from sklearn.utils.linear_assignment_ import linear_assignment
 from scipy.optimize import linear_sum_assignment as linear_assignment
 
 from . import kalman_filter
@@ -25,6 +23,12 @@ def min_cost_matching(
         tracks, detections, track_indices, detection_indices)
     cost_matrix[cost_matrix > max_distance] = max_distance + 1e-5
 
+    nan_mask = np.isnan(cost_matrix)
+    inf_mask = np.isinf(cost_matrix)
+
+    default_value = 0
+    cost_matrix[nan_mask] = default_value
+    cost_matrix[inf_mask] = default_value
     row_indices, col_indices = linear_assignment(cost_matrix)
 
     matches, unmatched_tracks, unmatched_detections = [], [], []
@@ -48,48 +52,31 @@ def min_cost_matching(
 def matching_cascade(
         distance_metric, max_distance, cascade_depth, tracks, detections,
         track_indices=None, detection_indices=None):
-
-    # Initialization
     if track_indices is None:
-        track_indices = set(range(len(tracks)))
-    else:
-        track_indices = set(track_indices)  # Ensure it's a set
-
+        track_indices = list(range(len(tracks)))
     if detection_indices is None:
-        detection_indices = set(range(len(detections)))
-    else:
-        detection_indices = set(detection_indices)  # Ensure it's a set
+        detection_indices = list(range(len(detections)))
 
     unmatched_detections = detection_indices
     matches = []
-
-    # Group tracks by time_since_update
-    grouped_tracks = {}
-    for track_idx in track_indices:
-        age = tracks[track_idx].time_since_update
-        if age not in grouped_tracks:
-            grouped_tracks[age] = set()
-        grouped_tracks[age].add(track_idx)
-
     for level in range(cascade_depth):
-        if not unmatched_detections:  # No detections left
+        if len(unmatched_detections) == 0:  # No detections left
             break
 
-        track_indices_l = grouped_tracks.get(1 + level, set())
-        if not track_indices_l:  # Nothing to match at this level
+        track_indices_l = [
+            k for k in track_indices
+            if tracks[k].time_since_update == 1 + level
+        ]
+        if len(track_indices_l) == 0:  # Nothing to match at this level
             continue
 
-        matches_l, _, unmatched_detections_temp = \
+        matches_l, _, unmatched_detections = \
             min_cost_matching(
                 distance_metric, max_distance, tracks, detections,
-                list(track_indices_l), list(unmatched_detections))
+                track_indices_l, unmatched_detections)
         matches += matches_l
-        unmatched_detections -= set(unmatched_detections_temp)  # Set subtraction
-
-    unmatched_tracks = track_indices - {k for k, _ in matches}  # Set subtraction
-
-    return matches, list(unmatched_tracks), list(unmatched_detections)
-
+    unmatched_tracks = list(set(track_indices) - set(k for k, _ in matches))
+    return matches, unmatched_tracks, unmatched_detections
 
 
 def gate_cost_matrix(
