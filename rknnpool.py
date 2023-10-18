@@ -34,7 +34,7 @@ class rknnHumanDetector():
         self.rknn = rknnInit("./rknnModel/human.rknn", 0)
 
     def get(self, frame):
-        return rknnDetectionFunc(self.rknn, frame, self.threshold), True
+        return rknnDetectionFunc(self.rknn, frame, self.threshold)
 
     def release(self):
         self.rknn.release()
@@ -46,7 +46,7 @@ class rknnTracking():
         self.deep_sort = DeepSort(self.rknn, True)
 
     def get(self, frame, boxes):
-        return rknnTrackFunc((), frame, boxes)
+        return rknnTrackFunc(self.deep_sort, frame, boxes)
 
     def release(self):
         return True

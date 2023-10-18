@@ -22,8 +22,8 @@ class RknnExtractor:
         embs = []
         for im in im_crops:
             inp = preprocess(im)
-            emb = self.onnx_model.inference(inputs=[im_crops])
-            # emb = self.onnx_model.run(self.output_names, {self.input_names[0]: inp})[0]
+            emb = self.onnx_model.inference(inputs=[inp])
+            emb = np.array(emb)
             embs.append(emb.squeeze())
-        embs = np.array(np.stack(embs), dtype=np.float32)
+        embs = np.array(np.stack(embs), dtype=np.float16)
         return embs
