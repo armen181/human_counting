@@ -6,7 +6,7 @@ cap = cv2.VideoCapture('./resource/4.m4v')
 # cap = cv2.VideoCapture(1)
 
 use_rknn = False
-threshold = 0.4
+threshold = 0.25
 
 if use_rknn:
     from rknnpool import rknnHumanDetector, rknnTracking

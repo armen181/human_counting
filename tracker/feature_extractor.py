@@ -1,10 +1,9 @@
 import cv2
 import numpy as np
-import onnxruntime as rt
 
 
 def preprocess(img):
-    img = cv2.resize(img, (64, 128))
+    img = cv2.resize(img, (128, 64))
     img = np.float32(img)
     img = img / 255.0
     img = img.transpose(2, 1, 0)
@@ -14,10 +13,10 @@ def preprocess(img):
 
 
 class Extractor:
-    def __init__(self, model_path) -> None:
-        self.onnx_model = rt.InferenceSession(model_path)
-        self.input_names = ["input_1"]
-        self.output_names = ["output_1"]
+    def __init__(self, model) -> None:
+        self.onnx_model = model
+        self.input_names = ["input"]
+        self.output_names = ["output"]
 
     def __call__(self, im_crops):
         embs = []

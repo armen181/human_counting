@@ -1,3 +1,4 @@
+import onnxruntime as rt
 import torch
 
 from func.detectionfunc import detectionFunc
@@ -25,7 +26,8 @@ class humanDetector():
 
 class tracking():
     def __init__(self):
-        self.deepsort = DeepSort("./model/original_ckpt.onnx")
+        self.onnx_model = rt.InferenceSession("./model/ckpt.onnx")
+        self.deepsort = DeepSort(self.onnx_model, False)
 
     def get(self, frame, boxes):
         return trackFunc(self.deepsort, frame, boxes)

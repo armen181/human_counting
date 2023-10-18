@@ -2,6 +2,7 @@ from rknnlite.api import RKNNLite
 
 from func.rknndetectionfunc import rknnDetectionFunc
 from func.rknntrackfunc import rknnTrackFunc
+from tracker import DeepSort
 
 
 def rknnInit(rknnModel, id):
@@ -40,6 +41,9 @@ class rknnHumanDetector():
 
 
 class rknnTracking():
+    def __init__(self):
+        self.rknn = rknnInit("./rknnModel/ckpt.rknn", 1)
+        self.deep_sort = DeepSort(self.rknn, True)
 
     def get(self, frame, boxes):
         return rknnTrackFunc((), frame, boxes)
