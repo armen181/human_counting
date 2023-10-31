@@ -4,7 +4,7 @@ from __future__ import absolute_import
 import numpy as np
 
 import sys
-sys.path.append("/Users/armen/IdeaProjects/human_counting/tracker/build/lib.macosx-10.9-x86_64-cpython-38/tracker")
+sys.path.append("D:/EverythingDetection/human_counting/tracker")
 import tracking_module
 
 from . import iou_matching
