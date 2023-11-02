@@ -82,9 +82,9 @@ class CentroidTracker:
         rects = [[x - w//2, y - h//2, x + w//2, y + h//2] for x, y, w, h in boxes]
         self.update(rects)
 
-        for bbox in boxes:
-            x, y, w, h = bbox
-            cv2.rectangle(frame, (x - w//2, y - h//2), (x + w//2, y + h//2), (255, 255, 0), 2)
+        for bbox in rects:
+            x1, y1, x2, y2 = bbox
+            cv2.rectangle(frame, (int(x1), int(y1)), (int(x2), int(y2)), (255, 255, 0), 2)
 
         for _id, (x, y) in self.objects.items():
             cv2.putText(frame, str(_id), (x - 7, y + 7), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2, cv2.LINE_AA)
