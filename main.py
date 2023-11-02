@@ -1,3 +1,4 @@
+from centroid_tracker import CentroidTracker
 from time import perf_counter, sleep
 from fps_limiter import FPSLimiter
 from typing import Optional
@@ -12,6 +13,7 @@ def main(
     fps_cap: Optional[int] = None,
     web_cam: Optional[int] = None,
     hide_window: bool = True):
+
     if file_path is not None:
         cap = cv2.VideoCapture(file_path)
     elif web_cam is not None:
@@ -20,16 +22,13 @@ def main(
         raise ValueError("Either specify file_path or web_cam, both were None")
 
     if use_rknn:
-        from rknnpool import rknnHumanDetector, rknnTracking
-
+        from rknnpool import rknnHumanDetector
         firstDetector = rknnHumanDetector(threshold)
-        secondTracking = rknnTracking()
     else:
         from tourchpool import humanDetector
-        from centroid_tracker import CentroidTracker
-
         firstDetector = humanDetector(threshold)
-        secondTracking = CentroidTracker()
+
+    secondTracking = CentroidTracker()
 
     if fps_cap is not None:
         fps_limiter = FPSLimiter(fps_cap)
