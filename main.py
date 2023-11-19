@@ -1,6 +1,6 @@
 from centroid_tracker import CentroidTracker
-from time import perf_counter, sleep
 from fps_limiter import FPSLimiter
+from time import perf_counter
 from typing import Optional
 import argparse
 import cv2
@@ -9,7 +9,10 @@ import cv2
 def main(
     use_rknn: bool,
     threshold: float,
+    line: str,
     file_path: Optional[str] = None,
+    api_url: Optional[str] = None,
+    camera_id: Optional[str] = None,
     fps_cap: Optional[int] = None,
     web_cam: Optional[int] = None,
     hide_window: bool = True,
@@ -21,7 +24,7 @@ def main(
     else:
         raise ValueError("Either specify file_path or web_cam, both were None")
 
-    line = [(10, 300), (630, 350)] # ToDo add this to arg parser
+    line = [int(num) for num in line.split(",")]
 
     if use_rknn:
         from rknnpool import rknnHumanDetector
@@ -30,7 +33,7 @@ def main(
         from tourchpool import humanDetector
         firstDetector = humanDetector(threshold)
 
-    secondTracking = CentroidTracker(line)
+    secondTracking = CentroidTracker(line, api_url, camera_id)
 
     if fps_cap is not None:
         fps_limiter = FPSLimiter(fps_cap)
@@ -49,9 +52,11 @@ def main(
         # boxes = [
         #     [10 + frames * 0.55, 10 + frames, 30, 30],
         #     [100 + frames, 500 - frames * 0.4, 30, 30],
+        #     [50 + frames, 510 - frames * 1.7, 30, 30],
         #     [10 + frames, 500 - frames, 30, 30],
         #     [600 - frames * 0.5, 10 + frames * 1.5, 30, 30],
         # ]
+        # boxes = [box for box in boxes if 0 < box[0] < 640]
 
         if boxes is None or len(boxes) == 0:
             continue
@@ -80,11 +85,14 @@ if __name__ == "__main__":
 
     parser.add_argument("-r", "--use_rknn", action="store_true", help="Enable RKNN usage")
     parser.add_argument("-t", "--threshold", type=float, default=0.25, help="Detection threshold value")
+    parser.add_argument("-l", "--line", type=str, default="10,300,630,350", help='Line coordinates in the format "start_x,start_y,end_x,end_y" as integers')
     parser.add_argument("-f", "--file_path", type=str, default=None, help="Path to video file, setting this will ignore web_cam argument")
     parser.add_argument("-fps", "--fps_cap", type=int, default=None, help="FPS cap (optional)")
+    parser.add_argument("-url", "--api_url", type=str, default=None, help="Servers url to post the information")
+    parser.add_argument("-ci", "--camera_id", type=str, default=None, help="Camera id which is registered in the server, this is used for calling the api")
     parser.add_argument("-wc", "--web_cam", type=int, default=None, help="Webcam number, 0 for first webcome (optional)")
     parser.add_argument("-hw", "--hide_window", action="store_true", help="Show the video/cam (affects performance)")
 
     args = parser.parse_args()
 
-    main(args.use_rknn, args.threshold, args.file_path, args.fps_cap, args.web_cam, args.hide_window)
+    main(args.use_rknn, args.threshold, args.line, args.file_path, args.api_url, args.camera_id, args.fps_cap, args.web_cam, args.hide_window)
