@@ -12,14 +12,16 @@ def main(
     file_path: Optional[str] = None,
     fps_cap: Optional[int] = None,
     web_cam: Optional[int] = None,
-    hide_window: bool = True):
-
+    hide_window: bool = True,
+):
     if file_path is not None:
         cap = cv2.VideoCapture(file_path)
     elif web_cam is not None:
         cap = cv2.VideoCapture(web_cam)
     else:
         raise ValueError("Either specify file_path or web_cam, both were None")
+
+    line = [(10, 300), (630, 350)] # ToDo add this to arg parser
 
     if use_rknn:
         from rknnpool import rknnHumanDetector
@@ -28,7 +30,7 @@ def main(
         from tourchpool import humanDetector
         firstDetector = humanDetector(threshold)
 
-    secondTracking = CentroidTracker()
+    secondTracking = CentroidTracker(line)
 
     if fps_cap is not None:
         fps_limiter = FPSLimiter(fps_cap)
@@ -43,14 +45,22 @@ def main(
 
         frame, boxes = firstDetector.get(frame)
 
+        # This is for Ardalan's debugging, dont delete :D
+        # boxes = [
+        #     [10 + frames * 0.55, 10 + frames, 30, 30],
+        #     [100 + frames, 500 - frames * 0.4, 30, 30],
+        #     [10 + frames, 500 - frames, 30, 30],
+        #     [600 - frames * 0.5, 10 + frames * 1.5, 30, 30],
+        # ]
+
         if boxes is None or len(boxes) == 0:
             continue
 
         frame, boxes = secondTracking.get(frame, boxes)
 
         if not hide_window:
-            cv2.imshow('Human Counting', frame)
-            if cv2.waitKey(1) & 0xFF == ord('q'):
+            cv2.imshow("Human Counting", frame)
+            if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
 
         if frames % 30 == 0:
@@ -68,14 +78,13 @@ def main(
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="CLI for human detection")
 
-    parser.add_argument('-r', '--use_rknn', action='store_true', help="Enable RKNN usage")
-    parser.add_argument('-t', '--threshold', type=float, default=0.25, help="Detection threshold value")
-    parser.add_argument('-f', '--file_path', type=str, default=None, help="Path to video file, setting this will ignore web_cam argument")
-    parser.add_argument('-fps', '--fps_cap', type=int, default=None, help="FPS cap (optional)")
-    parser.add_argument('-wc', '--web_cam', type=int, default=None, help="Webcam number, 0 for first webcome (optional)")
-    parser.add_argument('-hw', '--hide_window', action='store_true', help="Show the video/cam (affects performance)")
+    parser.add_argument("-r", "--use_rknn", action="store_true", help="Enable RKNN usage")
+    parser.add_argument("-t", "--threshold", type=float, default=0.25, help="Detection threshold value")
+    parser.add_argument("-f", "--file_path", type=str, default=None, help="Path to video file, setting this will ignore web_cam argument")
+    parser.add_argument("-fps", "--fps_cap", type=int, default=None, help="FPS cap (optional)")
+    parser.add_argument("-wc", "--web_cam", type=int, default=None, help="Webcam number, 0 for first webcome (optional)")
+    parser.add_argument("-hw", "--hide_window", action="store_true", help="Show the video/cam (affects performance)")
 
     args = parser.parse_args()
 
     main(args.use_rknn, args.threshold, args.file_path, args.fps_cap, args.web_cam, args.hide_window)
-
