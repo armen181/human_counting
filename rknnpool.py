@@ -3,6 +3,7 @@ from rknnlite.api import RKNNLite
 from func.rknndetectionfunc import rknnDetectionFunc
 from func.rknntrackfunc import rknnTrackFunc
 from tracker import DeepSort
+import cv2
 
 
 def rknnInit(rknnModel, id):
@@ -29,9 +30,9 @@ def rknnInit(rknnModel, id):
 
 
 class rknnHumanDetector():
-    def __init__(self, threshold):
+    def __init__(self, threshold, npu=0):
         self.threshold = threshold
-        self.rknn = rknnInit("./rknnModel/human.rknn", 0)
+        self.rknn = rknnInit("./rknnModel/human.rknn", npu)
 
     def get(self, frame):
         return rknnDetectionFunc(self.rknn, frame, self.threshold)
@@ -40,13 +41,56 @@ class rknnHumanDetector():
         self.rknn.release()
 
 
-class rknnTracking():
-    def __init__(self):
-        self.rknn = rknnInit("./rknnModel/ckpt.rknn", 1)
-        self.deep_sort = DeepSort(self.rknn, True)
+class rknnFaceDetector():
+    def __init__(self, threshold, npu=1):
+        self.threshold = threshold
+        self.rknn = rknnInit("./rknnModel/face.rknn", npu)
 
-    def get(self, frame, boxes):
-        return rknnTrackFunc(self.deep_sort, frame, boxes)
+    def get(self, frame):
+        IMG = cv2.cvtColor(IMG, cv2.COLOR_BGR2RGB)
+        outputs = self.rknn.inference(inputs=[IMG])
+        return outputs
 
     def release(self):
-        return True
+        self.rknn.release()
+
+
+class rknnAgeDetector():
+    def __init__(self, threshold, npu=2):
+        self.threshold = threshold
+        self.rknn = rknnInit("./rknnModel/age.rknn", npu)
+
+    def get(self, frame):
+        IMG = cv2.cvtColor(IMG, cv2.COLOR_BGR2RGB)
+        outputs = self.rknn.inference(inputs=[IMG])
+        return outputs
+
+
+    def release(self):
+        self.rknn.release()
+
+class rknnGenderDetector():
+    def __init__(self, threshold, npu=2):
+        self.threshold = threshold
+        self.rknn = rknnInit("./rknnModel/gender.rknn", npu)
+
+    def get(self, frame):
+        IMG = cv2.cvtColor(IMG, cv2.COLOR_BGR2RGB)
+        outputs = self.rknn.inference(inputs=[IMG])
+        return outputs
+
+
+    def release(self):
+        self.rknn.release()
+
+
+# class rknnTracking():
+#     def __init__(self):
+#         self.rknn = rknnInit("./rknnModel/ckpt.rknn", 1)
+#         self.deep_sort = DeepSort(self.rknn, True)
+
+#     def get(self, frame, boxes):
+#         return rknnTrackFunc(self.deep_sort, frame, boxes)
+
+#     def release(self):
+#         return True

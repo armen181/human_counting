@@ -27,8 +27,11 @@ def main(
     line = [int(num) for num in line.split(",")]
 
     if use_rknn:
-        from rknnpool import rknnHumanDetector
+        from rknnpool import rknnHumanDetector, rknnFaceDetector, rknnAgeDetector, rknnGenderDetector
         firstDetector = rknnHumanDetector(threshold)
+        face_detector = rknnFaceDetector(threshold)
+        age_detector = rknnAgeDetector(threshold)
+        gender_detector = rknnGenderDetector(threshold)
     else:
         from tourchpool import humanDetector
         firstDetector = humanDetector(threshold)
@@ -41,10 +44,16 @@ def main(
     frames, loopTime, initTime = 0, perf_counter(), perf_counter()
     while cap.isOpened():
         frames += 1
-        ret, frame = cap.read()
+        ret, orig_frame = cap.read()
         if not ret:
             break
-        frame = cv2.resize(frame, (640, 640))
+
+        face_frame = cv2.resize(orig_frame, (640, 480))
+        frame = cv2.resize(orig_frame, (640, 640))
+        
+        print("Face output:", face_detector.get(face_frame))
+        print("Age output:", age_detector.get(frame))
+        print("Gender output:", gender_detector.get(frame))
 
         frame, boxes = firstDetector.get(frame)
 
