@@ -1,8 +1,8 @@
 from rknnlite.api import RKNNLite
 
 from func.rknndetectionfunc import rknnDetectionFunc
-from func.rknntrackfunc import rknnTrackFunc
-from tracker import DeepSort
+# from func.rknntrackfunc import rknnTrackFunc
+# from tracker import DeepSort
 import cv2
 
 
