@@ -47,8 +47,8 @@ class rknnFaceDetector():
         self.rknn = rknnInit("./rknnModel/face.rknn", npu)
 
     def get(self, frame):
-        IMG = cv2.cvtColor(IMG, cv2.COLOR_BGR2RGB)
-        outputs = self.rknn.inference(inputs=[IMG])
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        outputs = self.rknn.inference(inputs=[frame])
         return outputs
 
     def release(self):
@@ -61,8 +61,8 @@ class rknnAgeDetector():
         self.rknn = rknnInit("./rknnModel/age.rknn", npu)
 
     def get(self, frame):
-        IMG = cv2.cvtColor(IMG, cv2.COLOR_BGR2RGB)
-        outputs = self.rknn.inference(inputs=[IMG])
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        outputs = self.rknn.inference(inputs=[frame])
         return outputs
 
 
@@ -75,8 +75,8 @@ class rknnGenderDetector():
         self.rknn = rknnInit("./rknnModel/gender.rknn", npu)
 
     def get(self, frame):
-        IMG = cv2.cvtColor(IMG, cv2.COLOR_BGR2RGB)
-        outputs = self.rknn.inference(inputs=[IMG])
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        outputs = self.rknn.inference(inputs=[frame])
         return outputs
 
 
