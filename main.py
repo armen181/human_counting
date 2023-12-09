@@ -54,9 +54,9 @@ def main(
         frame = cv2.resize(orig_frame, (640, 640))
 
         face_out = face_detector.get(orig_frame)
-        print("Face output:", type(face_out), face_out)
         if face_out is not None:
-            print("Face bboxes", face_postprocess(orig_frame.shape[0], orig_frame.shape[1], face_out[0], face_out[1], 0.5))
+            print("Face output:", type(face_out), len(face_out), face_out[0].shape, face_out[1].shape, face_out[2].shape)
+            # print("Face bboxes", face_postprocess(orig_frame.shape[0], orig_frame.shape[1], face_out[0], face_out[1], 0.5))
 
         frame, boxes = firstDetector.get(frame)
 
