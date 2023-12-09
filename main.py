@@ -54,7 +54,8 @@ def main(
         
         face_out = face_detector.get(face_frame)
         print("Face output:", type(face_out), face_out)
-        print("Face bboxes", face_postprocess(480, 640, face_out[0], face_out[1]))
+        if face_out is not None:
+            print("Face bboxes", face_postprocess(480, 640, face_out[0], face_out[1]))
         
 
         frame, boxes = firstDetector.get(frame)
