@@ -49,7 +49,7 @@ def main(
         if not ret:
             break
 
-        face_frame = cv2.resize(orig_frame, (640, 480))
+        face_frame = cv2.resize(orig_frame, (480, 640))
         frame = cv2.resize(orig_frame, (640, 640))
         
         face_out = face_detector.get(face_frame)
