@@ -57,8 +57,12 @@ def main(
 
         face_out = face_detector.get(face_frame)
         if face_out is not None:
-            print("Face output:", type(face_out), len(face_out), face_out[0].shape, face_out[1].shape, face_out[2].shape)
-            print("Face bboxes", face_postprocess(orig_frame.shape[0], orig_frame.shape[1], face_out[0], face_out[1], 0.5))
+            print("Face output:", type(face_out), len(face_out), face_out[0].shape, face_out[1].shape)
+            probs = face_out[0]
+            boxes = face_out[1]
+            probs = probs.reshape(1, -1, 2)
+            boxes = boxes.reshape(1, -1, 4)
+            print("Face bboxes", face_postprocess(orig_frame.shape[0], orig_frame.shape[1], probs, boxes, 0.5))
 
         gender = gender_detector.get(age_gender_frame)
         age = age_detector.get(age_gender_frame)
