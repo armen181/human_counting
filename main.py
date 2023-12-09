@@ -1,3 +1,4 @@
+from box_utils import predict as face_postprocess
 from centroid_tracker import CentroidTracker
 from fps_limiter import FPSLimiter
 from time import perf_counter
@@ -36,7 +37,7 @@ def main(
         from tourchpool import humanDetector
         firstDetector = humanDetector(threshold)
 
-    secondTracking = CentroidTracker(line, api_url, camera_id)
+    secondTracking = CentroidTracker(line, api_url, camera_id, face_detector, age_detector, gender_detector)
 
     if fps_cap is not None:
         fps_limiter = FPSLimiter(fps_cap)
@@ -51,9 +52,10 @@ def main(
         face_frame = cv2.resize(orig_frame, (640, 480))
         frame = cv2.resize(orig_frame, (640, 640))
         
-        print("Face output:", face_detector.get(face_frame))
-        print("Age output:", age_detector.get(frame))
-        print("Gender output:", gender_detector.get(frame))
+        face_out = face_detector.get(face_frame)
+        print("Face output:", type(face_out), face_out)
+        print("Face bboxes", face_postprocess(480, 640, face_out[0], face_out[1]))
+        
 
         frame, boxes = firstDetector.get(frame)
 

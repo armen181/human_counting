@@ -71,13 +71,23 @@ class TrackedObject:
 
 class CentroidTracker:
     def __init__(
-        self, line: Tuple[Tuple[int, int], Tuple[int, int]], api_url: Optional[str], camera_id: Optional[str], maxDisappeared: int = 10
+        self,
+        line: Tuple[Tuple[int, int], Tuple[int, int]],
+        api_url: Optional[str],
+        camera_id: Optional[str],
+        face_model,
+        age_model,
+        gender_model,
+        maxDisappeared: int = 10,
     ):
         self.objects: Dict[int, TrackedObject] = {}
         self.maxDisappeared = maxDisappeared
         self.line = line
         self.api_url = api_url
         self.camera_id = camera_id
+        self.face_model = face_model
+        self.age_model = age_model
+        self.gender_model = gender_model
         self.url = f"{api_url}/api/cameras/{camera_id}/events"
         self.num_ins = 0
         self.num_outs = 0
