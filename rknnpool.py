@@ -2,6 +2,7 @@ from rknnlite.api import RKNNLite
 import numpy as np
 
 from func.rknndetectionfunc import rknnDetectionFunc
+
 # from func.rknntrackfunc import rknnTrackFunc
 # from tracker import DeepSort
 import cv2
@@ -30,7 +31,7 @@ def rknnInit(rknnModel, id):
     return rknn_lite
 
 
-class rknnHumanDetector():
+class rknnHumanDetector:
     def __init__(self, threshold, npu=0):
         self.threshold = threshold
         self.rknn = rknnInit("./rknnModel/human.rknn", npu)
@@ -42,7 +43,7 @@ class rknnHumanDetector():
         self.rknn.release()
 
 
-class rknnFaceDetector():
+class rknnFaceDetector:
     def __init__(self, threshold, npu=1):
         self.threshold = threshold
         self.rknn = rknnInit("./rknnModel/face.rknn", npu)
@@ -57,30 +58,33 @@ class rknnFaceDetector():
         self.rknn.release()
 
 
-class rknnAgeDetector():
+class rknnAgeDetector:
     def __init__(self, threshold, npu=2):
         self.threshold = threshold
         self.rknn = rknnInit("./rknnModel/age.rknn", npu)
+        self.ageList = ["(0-2)", "(4-6)", "(8-12)", "(15-20)", "(25-32)", "(38-43)", "(48-53)", "(60-100)"]
 
     def get(self, frame):
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         outputs = self.rknn.inference(inputs=[frame])
-        return outputs
-
+        age = self.ageList[outputs[0].argmax()]
+        return age
 
     def release(self):
         self.rknn.release()
 
-class rknnGenderDetector():
+
+class rknnGenderDetector:
     def __init__(self, threshold, npu=2):
         self.threshold = threshold
         self.rknn = rknnInit("./rknnModel/gender.rknn", npu)
+        self.genderList = ["MALE", "FEMALE"]
 
     def get(self, frame):
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         outputs = self.rknn.inference(inputs=[frame])
-        return outputs
-
+        gender = self.genderList[outputs[0].argmax()]
+        return gender
 
     def release(self):
         self.rknn.release()

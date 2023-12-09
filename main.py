@@ -52,12 +52,16 @@ def main(
             break
 
         frame = cv2.resize(orig_frame, (640, 640))
+        age_gender_frame = cv2.resize(orig_frame, (224, 224))
 
         face_out = face_detector.get(orig_frame)
         if face_out is not None:
             print("Face output:", type(face_out), len(face_out), face_out[0].shape, face_out[1].shape, face_out[2].shape)
-            # print("Face bboxes", face_postprocess(orig_frame.shape[0], orig_frame.shape[1], face_out[0], face_out[1], 0.5))
+            print("Face bboxes", face_postprocess(orig_frame.shape[0], orig_frame.shape[1], face_out[0], face_out[1], 0.5))
 
+        gender = gender_detector.get(age_gender_frame)
+        age = age_detector.get(age_gender_frame)
+        print("AGE:", age, "GENDER:", gender)
         frame, boxes = firstDetector.get(frame)
 
         # This is for Ardalan's debugging, dont delete :D
