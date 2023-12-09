@@ -63,7 +63,13 @@ def main(
         boxes, _, probs = face_postprocess(orig_frame.shape[1], orig_frame.shape[0], probs, boxes, 0.5)
 
         for box in boxes:
+            box = [max(0, num) for num in box]
             x1, y1, x2, y2 = box
+            x1 = min(x1, orig_frame.shape[0])
+            x2 = min(x2, orig_frame.shape[0])
+            y1 = min(y1, orig_frame.shape[1])
+            y2 = min(y2, orig_frame.shape[1])
+            
             age_gender_frame = orig_frame[y1:y2, x1:x2]
             age_gender_frame = cv2.resize(age_gender_frame, (224, 224))
             gender = gender_detector.get(age_gender_frame)
