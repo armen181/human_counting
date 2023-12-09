@@ -39,7 +39,7 @@ def main(
 
         firstDetector = humanDetector(threshold)
 
-    secondTracking = CentroidTracker(line, api_url, camera_id, face_detector, age_detector, gender_detector)
+    # secondTracking = CentroidTracker(line, api_url, camera_id, face_detector, age_detector, gender_detector)
 
     if fps_cap is not None:
         fps_limiter = FPSLimiter(fps_cap)
@@ -47,27 +47,50 @@ def main(
     frames, loopTime, initTime = 0, perf_counter(), perf_counter()
     while cap.isOpened():
         frames += 1
-        ret, orig_frame = cap.read()
+        ret, frame = cap.read()
         if not ret:
             break
 
-        frame = cv2.resize(orig_frame, (640, 640))
-        age_gender_frame = cv2.resize(orig_frame, (224, 224))
-        face_frame = cv2.resize(orig_frame, (640, 480))
+        face_frame = cv2.resize(frame, (640, 480))
+        frame = cv2.resize(frame, (640, 640))
 
         face_out = face_detector.get(face_frame)
-        if face_out is not None:
-            print("Face output:", type(face_out), len(face_out), face_out[0].shape, face_out[1].shape)
-            probs = face_out[0]
-            boxes = face_out[1]
-            probs = probs.reshape(1, -1, 2)
-            boxes = boxes.reshape(1, -1, 4)
-            print("Face bboxes", face_postprocess(orig_frame.shape[0], orig_frame.shape[1], probs, boxes, 0.5))
 
-        gender = gender_detector.get(age_gender_frame)
-        age = age_detector.get(age_gender_frame)
-        print("AGE:", age, "GENDER:", gender)
-        frame, boxes = firstDetector.get(frame)
+        probs = face_out[0]
+        boxes = face_out[1]
+        probs = probs.reshape(1, -1, 2)
+        boxes = boxes.reshape(1, -1, 4)
+        boxes, _, probs = face_postprocess(frame.shape[1], frame.shape[0], probs, boxes, 0.5)
+
+        for box in boxes:
+            x1, y1, x2, y2 = box
+            age_gender_frame = frame[y1:y2, x1:x2]
+            age_gender_frame = cv2.resize(age_gender_frame, (224, 224))
+            gender = gender_detector.get(age_gender_frame)
+            age = age_detector.get(age_gender_frame)
+            cv2.rectangle(frame, (x2, y2), (x1, y1), (255, 255, 0), 2)
+            cv2.putText(
+                frame,
+                gender,
+                (x1, y1),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                1,
+                (255, 0, 0),
+                1,
+                cv2.LINE_AA,
+            )
+            cv2.putText(
+                frame,
+                age,
+                (x1, y1+20),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                1,
+                (255, 0, 0),
+                2,
+                cv2.LINE_AA,
+            )
+
+        # frame, boxes = firstDetector.get(frame)
 
         # This is for Ardalan's debugging, dont delete :D
         # boxes = [
@@ -82,7 +105,7 @@ def main(
         if boxes is None or len(boxes) == 0:
             continue
 
-        frame, boxes = secondTracking.get(frame, boxes)
+        # frame, boxes = secondTracking.get(frame, boxes)
 
         if not hide_window:
             cv2.imshow("Human Counting", frame)
@@ -95,6 +118,7 @@ def main(
 
         if fps_cap is not None:
             fps_limiter.update()
+
 
     cap.release()
     cv2.destroyAllWindows()

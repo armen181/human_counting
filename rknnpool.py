@@ -50,7 +50,11 @@ class rknnFaceDetector:
 
     def get(self, frame):
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        frame = np.reshape(frame, (3, frame.shape[0], frame.shape[1]))
+        frame = cv2.resize(frame, (640, 480))
+        frame_mean = np.array([127, 127, 127])
+        frame = (frame - frame_mean) / 128
+        frame = np.transpose(frame, [2, 0, 1])
+        frame = frame.astype(np.float32)
         outputs = self.rknn.inference(inputs=[frame])
         return outputs
 
@@ -66,6 +70,11 @@ class rknnAgeDetector:
 
     def get(self, frame):
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        frame = cv2.resize(frame, (224, 224))
+        frame_mean = np.array([104, 117, 123])
+        frame = frame - frame_mean
+        frame = np.transpose(frame, [2, 0, 1])
+        frame = frame.astype(np.float32)
         outputs = self.rknn.inference(inputs=[frame])
         age = self.ageList[outputs[0].argmax()]
         return age
@@ -82,6 +91,12 @@ class rknnGenderDetector:
 
     def get(self, frame):
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        frame = cv2.resize(frame, (224, 224))
+        frame_mean = np.array([104, 117, 123])
+        frame = frame - frame_mean
+        frame = np.transpose(frame, [2, 0, 1])
+        frame = frame.astype(np.float32)
+        outputs = self.rknn.inference(inputs=[frame])
         outputs = self.rknn.inference(inputs=[frame])
         gender = self.genderList[outputs[0].argmax()]
         return gender
