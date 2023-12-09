@@ -29,12 +29,14 @@ def main(
 
     if use_rknn:
         from rknnpool import rknnHumanDetector, rknnFaceDetector, rknnAgeDetector, rknnGenderDetector
+
         firstDetector = rknnHumanDetector(threshold)
         face_detector = rknnFaceDetector(threshold)
         age_detector = rknnAgeDetector(threshold)
         gender_detector = rknnGenderDetector(threshold)
     else:
         from tourchpool import humanDetector
+
         firstDetector = humanDetector(threshold)
 
     secondTracking = CentroidTracker(line, api_url, camera_id, face_detector, age_detector, gender_detector)
@@ -49,14 +51,12 @@ def main(
         if not ret:
             break
 
-        face_frame = cv2.resize(orig_frame, (480, 640))
         frame = cv2.resize(orig_frame, (640, 640))
-        
-        face_out = face_detector.get(face_frame)
+
+        face_out = face_detector.get(orig_frame)
         print("Face output:", type(face_out), face_out)
         if face_out is not None:
-            print("Face bboxes", face_postprocess(480, 640, face_out[0], face_out[1]))
-        
+            print("Face bboxes", face_postprocess(orig_frame.shape[0], orig_frame.shape[1], face_out[0], face_out[1], 0.5))
 
         frame, boxes = firstDetector.get(frame)
 
@@ -97,14 +97,20 @@ if __name__ == "__main__":
 
     parser.add_argument("-r", "--use_rknn", action="store_true", help="Enable RKNN usage")
     parser.add_argument("-t", "--threshold", type=float, default=0.25, help="Detection threshold value")
-    parser.add_argument("-l", "--line", type=str, default="10,300,630,350", help='Line coordinates in the format "start_x,start_y,end_x,end_y" as integers')
+    parser.add_argument(
+        "-l", "--line", type=str, default="10,300,630,350", help='Line coordinates in the format "start_x,start_y,end_x,end_y" as integers'
+    )
     parser.add_argument("-f", "--file_path", type=str, default=None, help="Path to video file, setting this will ignore web_cam argument")
     parser.add_argument("-fps", "--fps_cap", type=int, default=None, help="FPS cap (optional)")
     parser.add_argument("-url", "--api_url", type=str, default=None, help="Servers url to post the information")
-    parser.add_argument("-ci", "--camera_id", type=str, default=None, help="Camera id which is registered in the server, this is used for calling the api")
+    parser.add_argument(
+        "-ci", "--camera_id", type=str, default=None, help="Camera id which is registered in the server, this is used for calling the api"
+    )
     parser.add_argument("-wc", "--web_cam", type=int, default=None, help="Webcam number, 0 for first webcome (optional)")
     parser.add_argument("-hw", "--hide_window", action="store_true", help="Show the video/cam (affects performance)")
 
     args = parser.parse_args()
 
-    main(args.use_rknn, args.threshold, args.line, args.file_path, args.api_url, args.camera_id, args.fps_cap, args.web_cam, args.hide_window)
+    main(
+        args.use_rknn, args.threshold, args.line, args.file_path, args.api_url, args.camera_id, args.fps_cap, args.web_cam, args.hide_window
+    )
