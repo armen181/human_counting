@@ -51,7 +51,10 @@ class rknnFaceDetector:
     def get(self, frame):
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         frame = cv2.resize(frame, (640, 480))
+        frame_mean = np.array([127, 127, 127])
+        frame = (frame - frame_mean) / 128
         frame = np.transpose(frame, [2, 0, 1])
+        frame = frame.astype(np.float32)
         outputs = self.rknn.inference(inputs=[frame])
         return outputs
 
