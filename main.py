@@ -71,8 +71,8 @@ def main(
             x2 = min(x2, orig_frame.shape[0])
             y1 = min(y1, orig_frame.shape[1])
             y2 = min(y2, orig_frame.shape[1])
-
-            age_gender_frame = orig_frame[y1:y2, x1:x2]
+            print(box, orig_frame.shape, x1, x2, y1, y2)
+            age_gender_frame = orig_frame[x1:x2, y1:y2]
             age_gender_frame = cv2.resize(age_gender_frame, (224, 224))
             gender = gender_detector.get(age_gender_frame)
             age = age_detector.get(age_gender_frame)
