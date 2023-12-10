@@ -53,7 +53,7 @@ def main(
         if not ret:
             break
 
-        face_frame = cv2.resize(orig_frame, (640, 480))
+        face_frame = cv2.resize(orig_frame, (480, 640))
         frame = cv2.resize(orig_frame, (640, 640))
 
         face_out = face_detector.get(face_frame)
@@ -65,9 +65,8 @@ def main(
         boxes, _, probs = face_postprocess(face_frame.shape[1], face_frame.shape[0], probs, boxes, 0.5)
 
         for box in boxes:
-            box = [max(0, num) for num in box]
             x1, y1, x2, y2 = box
-            print(box, face_frame.shape, x1, x2, y1, y2)
+            print(box, face_frame.shape)
             age_gender_frame = face_frame[y1:y2, x1:x2]
             age_gender_frame = cv2.resize(age_gender_frame, (224, 224))
             gender = gender_detector.get(age_gender_frame)
