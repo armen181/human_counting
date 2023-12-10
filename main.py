@@ -62,23 +62,23 @@ def main(
         boxes = face_out[1]
         probs = probs.reshape(1, -1, 2)
         boxes = boxes.reshape(1, -1, 4)
-        boxes, _, probs = face_postprocess(orig_frame.shape[1], orig_frame.shape[0], probs, boxes, 0.5)
+        boxes, _, probs = face_postprocess(face_frame.shape[1], face_frame.shape[0], probs, boxes, 0.5)
 
         for box in boxes:
             box = [max(0, num) for num in box]
             x1, y1, x2, y2 = box
-            x1 = min(x1, orig_frame.shape[0])
-            x2 = min(x2, orig_frame.shape[0])
-            y1 = min(y1, orig_frame.shape[1])
-            y2 = min(y2, orig_frame.shape[1])
-            print(box, orig_frame.shape, x1, x2, y1, y2)
-            age_gender_frame = orig_frame[x1:x2, y1:y2]
+            x1 = min(x1, face_frame.shape[0])
+            x2 = min(x2, face_frame.shape[0])
+            y1 = min(y1, face_frame.shape[1])
+            y2 = min(y2, face_frame.shape[1])
+            print(box, face_frame.shape, x1, x2, y1, y2)
+            age_gender_frame = face_frame[x1:x2, y1:y2]
             age_gender_frame = cv2.resize(age_gender_frame, (224, 224))
             gender = gender_detector.get(age_gender_frame)
             age = age_detector.get(age_gender_frame)
-            cv2.rectangle(orig_frame, (x2, y2), (x1, y1), (255, 255, 0), 2)
+            cv2.rectangle(face_frame, (x2, y2), (x1, y1), (255, 255, 0), 2)
             cv2.putText(
-                orig_frame,
+                face_frame,
                 f"{gender}_{age}",
                 (x1, y1),
                 cv2.FONT_HERSHEY_SIMPLEX,
@@ -109,7 +109,7 @@ def main(
             cv2.imshow("Human Counting", orig_frame)
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
-        temp = cv2.resize(orig_frame, (640, 640))
+        temp = cv2.resize(face_frame, (640, 640))
         video_writer.write(temp)
         if frames % 30 == 0:
             print("30 average fps:\t", 30 / (perf_counter() - loopTime), "帧")
