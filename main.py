@@ -18,6 +18,8 @@ def main(
     web_cam: Optional[int] = None,
     hide_window: bool = True,
 ):
+    video_writer = cv2.VideoWriter("output.avi", cv2.VideoWriter_fourcc(*"MJPG"), 30, (640, 640))
+
     if file_path is not None:
         cap = cv2.VideoCapture(file_path)
     elif web_cam is not None:
@@ -69,7 +71,7 @@ def main(
             x2 = min(x2, orig_frame.shape[0])
             y1 = min(y1, orig_frame.shape[1])
             y2 = min(y2, orig_frame.shape[1])
-            
+
             age_gender_frame = orig_frame[y1:y2, x1:x2]
             age_gender_frame = cv2.resize(age_gender_frame, (224, 224))
             gender = gender_detector.get(age_gender_frame)
@@ -77,22 +79,12 @@ def main(
             cv2.rectangle(orig_frame, (x2, y2), (x1, y1), (255, 255, 0), 2)
             cv2.putText(
                 orig_frame,
-                gender,
+                f"{gender}_{age}",
                 (x1, y1),
                 cv2.FONT_HERSHEY_SIMPLEX,
                 1,
                 (255, 0, 0),
                 1,
-                cv2.LINE_AA,
-            )
-            cv2.putText(
-                orig_frame,
-                age,
-                (x1, y1+20),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                1,
-                (255, 0, 0),
-                2,
                 cv2.LINE_AA,
             )
 
@@ -117,7 +109,8 @@ def main(
             cv2.imshow("Human Counting", orig_frame)
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
-
+        temp = cv2.resize(orig_frame, (640, 640))
+        video_writer.write(temp)
         if frames % 30 == 0:
             print("30 average fps:\t", 30 / (perf_counter() - loopTime), "帧")
             loopTime = perf_counter()
@@ -125,10 +118,10 @@ def main(
         if fps_cap is not None:
             fps_limiter.update()
 
-
     cap.release()
     cv2.destroyAllWindows()
     firstDetector.release()
+    video_writer.release()
 
 
 if __name__ == "__main__":
